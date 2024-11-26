@@ -3,13 +3,6 @@ import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Ensure this imports your Product and ProductManager classes
 
 class TeaScreen extends StatefulWidget {
-  final BasketManager basketManager; // Pass BasketManager
-  final ProductManager productManager;
-
-  const TeaScreen(
-      {Key? key, required this.basketManager, required this.productManager})
-      : super(key: key);
-
   @override
   _TeaScreenState createState() => _TeaScreenState();
 }
@@ -66,12 +59,10 @@ class _TeaScreenState extends State<TeaScreen> {
               child: ListView(
                 children: filteredProducts.map((product) {
                   return TeaCard(
-                    id: product.id,
-                    image: product.image,
-                    name: product.name,
-                    price: '€${product.price.toStringAsFixed(2)}',
-                    basketManager: widget.basketManager, // Pass BasketManager
-                  );
+                      id: product.id,
+                      image: product.image,
+                      name: product.name,
+                      price: '€${product.price.toStringAsFixed(2)}');
                 }).toList(),
               ),
             ),
@@ -131,11 +122,7 @@ class _TeaScreenState extends State<TeaScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ShoppingCartPage(
-                  basketManager: widget.basketManager,
-                  productManager:
-                      widget.productManager, // Include ProductManager
-                ),
+                builder: (context) => ShoppingCartPage(),
               ),
             );
           }
@@ -180,16 +167,14 @@ class TeaCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
-  final BasketManager basketManager; // Accept BasketManager
 
-  const TeaCard({
-    Key? key,
-    required this.id,
-    required this.image,
-    required this.name,
-    required this.price,
-    required this.basketManager, // Accept basket manager
-  }) : super(key: key);
+  const TeaCard(
+      {Key? key,
+      required this.id,
+      required this.image,
+      required this.name,
+      required this.price})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

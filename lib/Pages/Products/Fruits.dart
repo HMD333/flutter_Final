@@ -3,13 +3,6 @@ import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Ensure this imports your Product and ProductManager classes
 
 class FruitsScreen extends StatefulWidget {
-  final BasketManager basketManager; // Pass BasketManager
-  final ProductManager productManager;
-
-  const FruitsScreen(
-      {Key? key, required this.basketManager, required this.productManager})
-      : super(key: key);
-
   @override
   _FruitsScreenState createState() => _FruitsScreenState();
 }
@@ -71,12 +64,10 @@ class _FruitsScreenState extends State<FruitsScreen> {
               child: ListView(
                 children: filteredProducts.map((product) {
                   return FruitCard(
-                    id: product.id,
-                    image: product.image,
-                    name: product.name,
-                    price: '€${product.price.toStringAsFixed(2)}',
-                    basketManager: widget.basketManager, // Pass BasketManager
-                  );
+                      id: product.id,
+                      image: product.image,
+                      name: product.name,
+                      price: '€${product.price.toStringAsFixed(2)}');
                 }).toList(),
               ),
             ),
@@ -150,11 +141,7 @@ class _FruitsScreenState extends State<FruitsScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ShoppingCartPage(
-                  basketManager: widget.basketManager,
-                  productManager:
-                      widget.productManager, // Include ProductManager
-                ),
+                builder: (context) => ShoppingCartPage(),
               ),
             );
           }
@@ -204,16 +191,14 @@ class FruitCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
-  final BasketManager basketManager; // Accept BasketManager
 
-  const FruitCard({
-    Key? key,
-    required this.id,
-    required this.image,
-    required this.name,
-    required this.price,
-    required this.basketManager, // Accept basket manager
-  }) : super(key: key);
+  const FruitCard(
+      {Key? key,
+      required this.id,
+      required this.image,
+      required this.name,
+      required this.price})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

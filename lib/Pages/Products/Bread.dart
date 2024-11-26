@@ -3,13 +3,6 @@ import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Ensure this imports your Product and ProductManager classes
 
 class BreadScreen extends StatefulWidget {
-  final BasketManager basketManager; // Pass BasketManager
-  final ProductManager productManager;
-
-  const BreadScreen(
-      {Key? key, required this.basketManager, required this.productManager})
-      : super(key: key);
-
   @override
   _BreadScreenState createState() => _BreadScreenState();
 }
@@ -70,7 +63,6 @@ class _BreadScreenState extends State<BreadScreen> {
                     image: product.image,
                     name: product.name,
                     price: '€${product.price.toStringAsFixed(2)}',
-                    basketManager: widget.basketManager, // Pass BasketManager
                   );
                 }).toList(),
               ),
@@ -131,11 +123,7 @@ class _BreadScreenState extends State<BreadScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ShoppingCartPage(
-                  basketManager: widget.basketManager,
-                  productManager:
-                      widget.productManager, // Include ProductManager
-                ),
+                builder: (context) => ShoppingCartPage(),
               ),
             );
           }
@@ -180,7 +168,6 @@ class BreadCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
-  final BasketManager basketManager; // Accept BasketManager
 
   const BreadCard({
     Key? key,
@@ -188,7 +175,6 @@ class BreadCard extends StatelessWidget {
     required this.image,
     required this.name,
     required this.price,
-    required this.basketManager, // Accept basket manager
   }) : super(key: key);
 
   @override

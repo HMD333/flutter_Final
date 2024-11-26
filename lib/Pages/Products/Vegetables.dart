@@ -3,13 +3,6 @@ import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Import ShoppingCartPage
 
 class VegetablesScreen extends StatefulWidget {
-  final BasketManager basketManager; // Pass BasketManager
-  final ProductManager productManager;
-
-  const VegetablesScreen(
-      {Key? key, required this.basketManager, required this.productManager})
-      : super(key: key);
-
   @override
   _VegetablesScreenState createState() => _VegetablesScreenState();
 }
@@ -113,13 +106,10 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
               child: ListView(
                 children: filteredProducts.map((product) {
                   return VegetableCard(
-                    id: product.id,
-                    image: product.image,
-                    name: product.name,
-                    price: '€${product.price.toStringAsFixed(2)}',
-                    basketManager:
-                        widget.basketManager, // Pass the basket manager
-                  );
+                      id: product.id,
+                      image: product.image,
+                      name: product.name,
+                      price: '€${product.price.toStringAsFixed(2)}');
                 }).toList(),
               ),
             ),
@@ -143,11 +133,7 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ShoppingCartPage(
-                    basketManager: widget.basketManager,
-                    productManager:
-                        widget.productManager, // Include ProductManager
-                  ),
+                  builder: (context) => ShoppingCartPage(),
                 ),
               );
             }
@@ -198,15 +184,12 @@ class VegetableCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
-  final BasketManager basketManager; // Add basket manager
 
-  VegetableCard({
-    required this.id,
-    required this.image,
-    required this.name,
-    required this.price,
-    required this.basketManager, // Accept basket manager
-  });
+  VegetableCard(
+      {required this.id,
+      required this.image,
+      required this.name,
+      required this.price});
 
   @override
   Widget build(BuildContext context) {

@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_final_project/Data/data.dart'; // Ensure this path is correct
 
 class ShoppingCartPage extends StatefulWidget {
-  final BasketManager basketManager; // Reference to BasketManager
-  final ProductManager productManager; // Reference to ProductManager
-
-  ShoppingCartPage(
-      {Key? key, required this.basketManager, required this.productManager})
-      : super(key: key);
-
   @override
   _ShoppingCartPageState createState() => _ShoppingCartPageState();
 }
@@ -16,7 +9,8 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   late List<Product> products =
       sampleProducts + sampleFruits + sampleBreads + sampleTeas;
-  List<Basket> get shoppingCart => widget.basketManager.baskets;
+
+  List<Basket> get shoppingCart => basketManager.baskets;
 
   Product getProductById(String id) {
     return products.firstWhere((product) => product.id == id);
@@ -24,20 +18,15 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   void removeItem(int index) {
     setState(() {
-      widget.basketManager.baskets.removeAt(index);
+      basketManager.baskets.removeAt(index);
     });
   }
 
-  void increaseQuantity(int index) {
+  void changeQuantity(int index, int delta) {
     setState(() {
-      widget.basketManager.baskets[index].quantity++;
-    });
-  }
-
-  void decreaseQuantity(int index) {
-    setState(() {
-      if (widget.basketManager.baskets[index].quantity > 1) {
-        widget.basketManager.baskets[index].quantity--;
+      final newQuantity = basketManager.baskets[index].quantity + delta;
+      if (newQuantity > 0) {
+        basketManager.baskets[index].quantity = newQuantity;
       }
     });
   }
@@ -68,59 +57,67 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                       itemBuilder: (context, index) {
                         final item = shoppingCart[index];
                         final product = getProductById(item.productId);
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            title: Text(product
-                                .name), // Assuming product has a name property
-                            subtitle: Text(
-                              '''Quantity: ${item.quantity}
-                               Price: ${product.price.toStringAsFixed(2)} RS
-                               Total: ${(product.price * item.quantity).toStringAsFixed(2)} RS''',
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () => decreaseQuantity(index),
-                                  icon: const Icon(Icons.remove),
-                                ),
-                                IconButton(
-                                  onPressed: () => increaseQuantity(index),
-                                  icon: const Icon(Icons.add),
-                                ),
-                                IconButton(
-                                  onPressed: () => removeItem(index),
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
+                        return _buildCartItem(product, item, index);
                       },
                     ),
                   ),
-                  // عرض إجمالي السعر
-                  Text(
-                    'Totel: ${calculateTotal().toStringAsFixed(2)} RS',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  _buildTotalPrice(),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/Checkout');
-                    },
-                    child: const Text('Buy'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 24),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                  ),
+                  _buildCheckoutButton(context),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildCartItem(Product product, Basket item, int index) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: ListTile(
+        title: Text(product.name), // Assuming product has a name property
+        subtitle: Text(
+          'Quantity: ${item.quantity}\n'
+          'Price: ${product.price.toStringAsFixed(2)} RS\n'
+          'Total: ${(product.price * item.quantity).toStringAsFixed(2)} RS',
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: () => changeQuantity(index, -1), // Decrease quantity
+              icon: const Icon(Icons.remove),
+            ),
+            IconButton(
+              onPressed: () => changeQuantity(index, 1), // Increase quantity
+              icon: const Icon(Icons.add),
+            ),
+            IconButton(
+              onPressed: () => removeItem(index),
+              icon: const Icon(Icons.delete, color: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTotalPrice() {
+    return Text(
+      'Total: ${calculateTotal().toStringAsFixed(2)} RS',
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildCheckoutButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        basketManager.Totel = calculateTotal();
+        Navigator.pushReplacementNamed(context, '/Checkout');
+      },
+      child: const Text('Buy'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+        textStyle: const TextStyle(fontSize: 18),
       ),
     );
   }

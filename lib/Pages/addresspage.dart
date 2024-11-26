@@ -21,13 +21,6 @@ class _AddressFormPageState extends State<AddressFormPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _loadUserInfo();
-      // Handle the submission, e.g., save to SharedPreferences or send to a server
-      print('Name: $_name');
-      print('Street Address: $_streetAddress');
-      print('City: $_city');
-      print('Postal Code: $_postalCode');
-      print('Country: $_country');
-      // Optionally navigate back or show a success message
     }
   }
 

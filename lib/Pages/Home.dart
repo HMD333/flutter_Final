@@ -7,12 +7,8 @@ import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Import your ShoppingCartPage
 
 class HomePage extends StatefulWidget {
-  final ProductManager productManager; // Pass ProductManager
-  final BasketManager basketManager; // Pass BasketManager
-
-  HomePage(
-      {Key? key, required this.productManager, required this.basketManager})
-      : super(key: key);
+  final ProductManager productManager;
+  HomePage({Key? key, required this.productManager}) : super(key: key);
 
   @override
   _HomePage createState() => _HomePage();
@@ -132,11 +128,7 @@ class _HomePage extends State<HomePage> {
         title: const Text('Home'),
       ),
       drawer: _buildDrawer(_textTheme),
-      body: _currentIndex == 0
-          ? _buildHomeContent()
-          : ShoppingCartPage(
-              basketManager: widget.basketManager,
-              productManager: widget.productManager),
+      body: _currentIndex == 0 ? _buildHomeContent() : ShoppingCartPage(),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(

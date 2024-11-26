@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/Data/data.dart';
+import 'package:flutter_final_project/Pages/ShoppingCart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -9,12 +10,7 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  bool _nonContactDelivery = true;
-  bool _pickItUpMyself = false;
-  bool _byCourier = false;
-  bool _byDrone = false;
-  int _selectedIndex = 0;
-
+  int _selectedDeliveryOption = 0; // Track the selected delivery option
   String _cardNumber = '';
   String _address = '';
 
@@ -30,7 +26,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     for (var userString in users) {
       Map<String, dynamic> user = jsonDecode(userString);
       if (user['userId'] == userId) {
-        // Ensure userId is defined
         setState(() {
           _cardNumber = user['cardNumber'] ?? '';
           _address = user['useraddres'] ?? '';
@@ -39,37 +34,40 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  void _onCheckout() {
-    // Handle the checkout process, e.g., navigate to a confirmation page
-    Navigator.pushReplacementNamed(
-        context, '/home'); // Ensure this route is defined
+  void clearasket() {
+    print(basketManager.baskets.length);
+    setState(() {
+      basketManager.baskets.clear();
+    });
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  String _getLastFourCardNumber(String cardNumber) {
+    return cardNumber.length >= 4
+        ? cardNumber.substring(cardNumber.length - 4)
+        : cardNumber;
+  }
+
+  void _onCheckout() {
+    clearasket();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('You have paid ${basketManager.Totel}')),
+    );
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
   Widget build(BuildContext context) {
-    _loadUserInfo();
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Checkout",
-          style: TextStyle(color: Color(0xFF6A1B9A), fontSize: 25),
-        ),
+        title: const Text("Checkout", style: TextStyle(fontSize: 25)),
+        backgroundColor: Theme.of(context).primaryColor,
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacementNamed(context, '/home');
           },
           iconSize: 17.0,
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Color(0xFF6A1B9A),
-          ),
+          icon: Icon(Icons.arrow_back_ios),
         ),
       ),
       body: SingleChildScrollView(
@@ -77,26 +75,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Payment Method
             _buildSectionTitle('Payment method'),
             _buildPaymentMethod(),
             Divider(color: Colors.white),
-
-            // Delivery Address
             _buildSectionTitle('Delivery address'),
             _buildDeliveryAddress(),
             Divider(color: Colors.white),
-
-            // Delivery Options
             _buildSectionTitle('Delivery options'),
             _buildDeliveryOptions(),
             Divider(color: Colors.white),
-
-            // Non-contact Delivery Toggle
-            // _buildNonContactDeliveryToggle(),
             SizedBox(height: 20),
-
-            // Checkout Button
             Center(
               child: ElevatedButton(
                 onPressed: _onCheckout,
@@ -117,10 +105,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 23,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF6A1B9A),
-      ),
+          fontSize: 23, fontWeight: FontWeight.bold, color: Color(0xFF6A1B9A)),
     );
   }
 
@@ -131,7 +116,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: Icon(Icons.credit_card, color: Color(0xFF6A1B9A)),
       ),
       title: Text(
-        _cardNumber.isNotEmpty ? _cardNumber : 'No card selected',
+        _cardNumber.isNotEmpty
+            ? '**** **** **** ${_getLastFourCardNumber(_cardNumber)}'
+            : 'No card selected',
         style: TextStyle(color: Colors.grey),
       ),
       trailing: ElevatedButton(
@@ -140,9 +127,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xFFAB47EC),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
         child: Text('Change', style: TextStyle(color: Colors.white)),
       ),
@@ -165,9 +151,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xFFAB47EC),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
         child: Text('Change', style: TextStyle(color: Colors.white)),
       ),
@@ -177,103 +162,40 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget _buildDeliveryOptions() {
     return Column(
       children: [
-        _buildDeliveryOption('I\'ll pick it up myself', _pickItUpMyself,
-            (value) {
-          setState(() {
-            _pickItUpMyself = value!;
-          });
-        }),
-        _buildDeliveryOption('By courier', _byCourier, (value) {
-          setState(() {
-            _byCourier = value!;
-          });
-        }),
-        _buildDeliveryOption('By Drone', _byDrone, (value) {
-          setState(() {
-            _byDrone = value!;
-          });
-        }),
+        _buildDeliveryOption(
+            'I\'ll pick it up myself', 0, Icons.directions_run_outlined),
+        _buildDeliveryOption('By courier', 1, Icons.local_shipping),
+        _buildDeliveryOption('By Drone', 2, Icons.airplanemode_on_outlined),
       ],
     );
   }
 
-  Widget _buildDeliveryOption(
-      String title, bool value, ValueChanged<bool?> onChanged) {
-    return CheckboxListTile(
+  Widget _buildDeliveryOption(String title, int index, IconData icon) {
+    return RadioListTile<int>(
       title: Row(
         children: [
-          Icon(
-            Icons.local_shipping,
-            color: value ? Color(0xFF6A1B9A) : Colors.grey,
-          ),
+          Icon(icon,
+              color: _selectedDeliveryOption == index
+                  ? Color(0xFF6A1B9A)
+                  : Colors.grey),
           SizedBox(width: 8.0),
           Text(
             title,
-            style: TextStyle(color: value ? Color(0xFF6A1B9A) : Colors.grey),
+            style: TextStyle(
+                color: _selectedDeliveryOption == index
+                    ? Color(0xFF6A1B9A)
+                    : Colors.grey),
           ),
         ],
       ),
-      value: value,
-      onChanged: onChanged,
-      controlAffinity: ListTileControlAffinity.trailing,
-      checkColor: Color(0xFF6A1B9A),
-      activeColor: Colors.transparent,
-      side: BorderSide.none,
+      value: index,
+      groupValue: _selectedDeliveryOption,
+      onChanged: (value) {
+        setState(() {
+          _selectedDeliveryOption = value!;
+        });
+      },
+      activeColor: Color(0xFFAB47EC),
     );
   }
-
-  // Widget _buildNonContactDeliveryToggle() {
-  //   return ListTile(
-  //     title: Text('Non-contact delivery'),
-  //     trailing: GestureDetector(
-  //       onTap: () {
-  //         setState(() {
-  //           _nonContactDelivery = !_nonContactDelivery;
-  //         });
-  //       },
-  //       child: AnimatedContainer(
-  //         duration: Duration(milliseconds: 300),
-  //         width: 70,
-  //         height: 35,
-  //         decoration: BoxDecoration(
-  //           borderRadius: BorderRadius.circular(20.0),
-  //           color: _nonContactDelivery ? Color(0xFFAB47EC) : Colors.grey,
-  //         ),
-  //         child: Stack(
-  //           children: [
-  //             Align(
-  //               alignment: _nonContactDelivery
-  //                   ? Alignment.centerRight
-  //                   : Alignment.centerLeft,
-  //               child: Container(
-  //                 width: 30,
-  //                 height: 30,
-  //                 margin: EdgeInsets.symmetric(horizontal: 3.0),
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.white,
-  //                   borderRadius: BorderRadius.circular(15.0),
-  //                 ),
-  //               ),
-  //             ),
-  //             Align(
-  //               alignment: _nonContactDelivery
-  //                   ? Alignment.centerLeft
-  //                   : Alignment.centerRight,
-  //               child: Padding(
-  //                 padding: EdgeInsets.symmetric(horizontal: 8.0),
-  //                 child: Text(
-  //                   _nonContactDelivery ? 'Yes' : 'No',
-  //                   style: TextStyle(
-  //                     color: Colors.white,
-  //                     fontWeight: FontWeight.bold,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

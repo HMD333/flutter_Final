@@ -37,6 +37,7 @@ class Basket {
 }
 
 class BasketManager {
+  double Totel = 0.0;
   List<Basket> baskets = []; // List to hold basket items
 
   // Method to add or update a basket item
@@ -432,3 +433,5 @@ List<Product> sampleTeas = [
       price: 1.90,
       color: 'Green'),
 ];
+
+BasketManager basketManager = BasketManager();

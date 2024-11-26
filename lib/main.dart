@@ -34,27 +34,11 @@ class MyApp extends StatelessWidget {
         '/': (context) => IndexPage(),
         '/login': (context) => LoginPage(),
         '/registration': (context) => RegistrationPage(),
-        '/home': (context) => HomePage(
-              productManager: ProductManager(), // Pass ProductManager
-              basketManager: BasketManager(), // Pass BasketManager
-            ),
-        // Update routes to include managers for product screens
-        '/Vegetables': (context) => VegetablesScreen(
-              basketManager: BasketManager(), // Pass BasketManager
-              productManager: ProductManager(), // Pass ProductManager
-            ),
-        '/Fruits': (context) => FruitsScreen(
-              basketManager: BasketManager(), // Pass BasketManager
-              productManager: ProductManager(), // Pass ProductManager
-            ),
-        '/Bread': (context) => BreadScreen(
-              basketManager: BasketManager(), // Pass BasketManager
-              productManager: ProductManager(), // Pass ProductManager
-            ),
-        '/Tea': (context) => TeaScreen(
-              basketManager: BasketManager(), // Pass BasketManager
-              productManager: ProductManager(), // Pass ProductManager
-            ),
+        '/home': (context) => HomePage(productManager: ProductManager()),
+        '/Vegetables': (context) => VegetablesScreen(),
+        '/Fruits': (context) => FruitsScreen(),
+        '/Bread': (context) => BreadScreen(),
+        '/Tea': (context) => TeaScreen(),
         '/Checkout': (context) => CheckoutPage(),
         '/CreditCard': (context) => CreditCardPage(),
         '/address': (context) => AddressFormPage(),
