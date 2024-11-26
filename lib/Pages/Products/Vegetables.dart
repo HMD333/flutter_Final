@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/Data/data.dart'; // Ensure this imports your Product and ProductManager classes
+import 'package:flutter_final_project/Data/data.dart';
+import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Import ShoppingCartPage
 
 class VegetablesScreen extends StatefulWidget {
+  final BasketManager basketManager; // Pass BasketManager
+  final ProductManager productManager;
+
+  const VegetablesScreen(
+      {Key? key, required this.basketManager, required this.productManager})
+      : super(key: key);
+
   @override
   _VegetablesScreenState createState() => _VegetablesScreenState();
 }
@@ -105,9 +113,12 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
               child: ListView(
                 children: filteredProducts.map((product) {
                   return VegetableCard(
+                    id: product.id,
                     image: product.image,
                     name: product.name,
                     price: '€${product.price.toStringAsFixed(2)}',
+                    basketManager:
+                        widget.basketManager, // Pass the basket manager
                   );
                 }).toList(),
               ),
@@ -116,17 +127,31 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            label: '', // Removed label
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: '', // Removed label
-          ),
-        ],
-      ),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view),
+              label: '', // Removed label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: '', // Removed label
+            ),
+          ],
+          onTap: (index) {
+            if (index == 1) {
+              // Navigate to ShoppingCartPage on tap
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShoppingCartPage(
+                    basketManager: widget.basketManager,
+                    productManager:
+                        widget.productManager, // Include ProductManager
+                  ),
+                ),
+              );
+            }
+          }),
     );
   }
 
@@ -169,11 +194,19 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
 }
 
 class VegetableCard extends StatelessWidget {
+  final String id;
   final String image;
   final String name;
   final String price;
+  final BasketManager basketManager; // Add basket manager
 
-  VegetableCard({required this.image, required this.name, required this.price});
+  VegetableCard({
+    required this.id,
+    required this.image,
+    required this.name,
+    required this.price,
+    required this.basketManager, // Accept basket manager
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +249,8 @@ class VegetableCard extends StatelessWidget {
                 size: 30,
               ),
               onPressed: () {
-                // Add your onPressed logic here
+                // Add or update the basket item
+                basketManager.addOrUpdateBasketItem(userId, id);
               },
             ),
           ),

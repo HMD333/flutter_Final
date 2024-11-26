@@ -1,11 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/Theme/theme_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_final_project/Data/data.dart';
+import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Import your ShoppingCartPage
 
 class HomePage extends StatefulWidget {
+  final ProductManager productManager; // Pass ProductManager
+  final BasketManager basketManager; // Pass BasketManager
+
+  HomePage(
+      {Key? key, required this.productManager, required this.basketManager})
+      : super(key: key);
+
   @override
   _HomePage createState() => _HomePage();
 }
@@ -14,9 +22,10 @@ class _HomePage extends State<HomePage> {
   String _username = "";
   String _email = "";
   String _imgpath = "";
-  late List<Map<String, dynamic>> categories; // Declare categories
+  late List<Map<String, dynamic>> categories;
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _filteredCategories = [];
+  int _currentIndex = 0; // Track the current index for BottomNavigationBar
 
   @override
   void initState() {
@@ -28,59 +37,65 @@ class _HomePage extends State<HomePage> {
 
   void _loadUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _username = prefs.getString("userName") ?? "";
-      _email = prefs.getString("userEmail") ?? "";
-      _imgpath = prefs.getString("userImage") ?? "";
-    });
+    List<String> users = prefs.getStringList('users') ?? [];
+    for (var userString in users) {
+      Map<String, dynamic> user = jsonDecode(userString);
+      if (user['userId'] == userId) {
+        setState(() {
+          _username = user['userName'] ?? "Guest";
+          _email = user['userEmail'] ?? "";
+          _imgpath = user['userImage'] ?? "";
+        });
+      }
+    }
   }
 
   void _initializeCategories() {
-    ProductManager productManager =
-        ProductManager(); // Ensure you initialize this
+    // Ensure sample products are added to the passed productManager
     for (var product in sampleProducts) {
-      productManager.addProduct(product);
+      widget.productManager.addProduct(product);
     }
     for (var product in sampleFruits) {
-      productManager.addProduct(product);
+      widget.productManager.addProduct(product);
     }
     for (var product in sampleBreads) {
-      productManager.addProduct(product);
+      widget.productManager.addProduct(product);
     }
     for (var product in sampleTeas) {
-      productManager.addProduct(product);
+      widget.productManager.addProduct(product);
     }
+
     setState(() {
       categories = [
         {
           'title': 'Vegetables',
-          'count': productManager.getCountByCategory('Vegetable'),
+          'count': widget.productManager.getCountByCategory('Vegetable'),
           'image': 'images/Vegetables.jpg',
         },
         {
           'title': 'Fruits',
-          'count': productManager.getCountByCategory('Fruit'),
+          'count': widget.productManager.getCountByCategory('Fruit'),
           'image': 'images/Fruits.jpg',
         },
         {
           'title': 'Bread',
-          'count': productManager.getCountByCategory('Bread'),
+          'count': widget.productManager.getCountByCategory('Bread'),
           'image': 'images/Bread.jpg',
         },
         {
           'title': 'Tea',
-          'count': productManager.getCountByCategory('Tea'),
+          'count': widget.productManager.getCountByCategory('Tea'),
           'image': 'images/Tea.jpg',
         },
       ];
-      _filteredCategories = categories; // Initialize filtered categories
+      _filteredCategories = categories;
     });
   }
 
   @override
   void dispose() {
     themeManager.removeListener(themeListener);
-    _searchController.dispose(); // Dispose the controller
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -102,111 +117,131 @@ class _HomePage extends State<HomePage> {
     });
   }
 
+  void _onBottomNavTapped(int index) {
+    setState(() {
+      _currentIndex = index; // Update the current index
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     TextTheme _textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        title: const Text('Home'),
       ),
-      drawer: Drawer(
-        backgroundColor: Theme.of(context).primaryColor,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              accountName: Text(
-                _username,
-                style: _textTheme.titleSmall?.copyWith(color: Colors.white),
-              ),
-              accountEmail: Text(
-                _email,
-                style: _textTheme.titleSmall?.copyWith(color: Colors.white),
-              ),
-              currentAccountPicture: GestureDetector(
-                child: CircleAvatar(
-                  backgroundImage: File(_imgpath).existsSync()
-                      ? FileImage(File(_imgpath))
-                      : const NetworkImage('https://via.placeholder.com/150'),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.white),
-              title:
-                  const Text('Profile', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                // Navigate to Profile
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.white),
-              title:
-                  const Text('Logout', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            TextField(
-              controller: _searchController,
-              onChanged: _filterCategories,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                hintText: 'Search',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Colors.blue, width: 2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 2.7 / 3,
-                ),
-                itemCount: _filteredCategories.length,
-                itemBuilder: (context, index) {
-                  final category = _filteredCategories[index];
-                  return CategoryCard(
-                    title: category['title'],
-                    count: category['count'],
-                    imageUrl: category['image'],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(_textTheme),
+      body: _currentIndex == 0
+          ? _buildHomeContent()
+          : ShoppingCartPage(
+              basketManager: widget.basketManager,
+              productManager: widget.productManager),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view),
-            label: '',
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
-            label: '',
+            label: 'Cart',
+          ),
+        ],
+        currentIndex: _currentIndex,
+        onTap: _onBottomNavTapped, // Handle tap events
+      ),
+    );
+  }
+
+  Widget _buildDrawer(TextTheme textTheme) {
+    return Drawer(
+      backgroundColor: Theme.of(context).primaryColor,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            accountName: Text(
+              _username,
+              style: textTheme.titleSmall?.copyWith(color: Colors.white),
+            ),
+            accountEmail: Text(
+              _email,
+              style: textTheme.titleSmall?.copyWith(color: Colors.white),
+            ),
+            currentAccountPicture: GestureDetector(
+              child: CircleAvatar(
+                backgroundImage:
+                    _imgpath.isNotEmpty && File(_imgpath).existsSync()
+                        ? FileImage(File(_imgpath))
+                        : const NetworkImage('https://via.placeholder.com/150'),
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.white),
+            title: const Text('Profile', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.pushNamed(context, '/profile'); // Navigate to Profile
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.white),
+            title: const Text('Logout', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHomeContent() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          TextField(
+            controller: _searchController,
+            onChanged: _filterCategories,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintText: 'Search',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 2.7 / 3,
+              ),
+              itemCount: _filteredCategories.length,
+              itemBuilder: (context, index) {
+                final category = _filteredCategories[index];
+                return CategoryCard(
+                  title: category['title'],
+                  count: category['count'],
+                  imageUrl: category['image'],
+                );
+              },
+            ),
           ),
         ],
       ),

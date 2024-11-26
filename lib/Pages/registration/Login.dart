@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_final_project/Data/data.dart';
 import 'package:flutter/services.dart'; // For input formatting
 
 class LoginPage extends StatefulWidget {
@@ -11,7 +13,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isObscure = true;
-  bool _isLoading = false; // Track loading state
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -21,7 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _isEmailValid(String email) {
-    // Basic email validation
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
@@ -31,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
     final email = emailController.text;
     final password = passwordController.text;
 
-    // Simple validation
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your email and password')),
@@ -47,20 +47,24 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() {
-      _isLoading = true; // Start loading
+      _isLoading = true;
     });
 
-    // Mock user authentication
-    // Replace this with your actual authentication logic
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (email == prefs.get('userEmail') &&
-        password == prefs.get('userPassword')) {
-      // Save user info in shared preferences
+    List<String> users = prefs.getStringList('users') ?? [];
 
-      await prefs.setString('userEmail', email);
+    bool isValidUser = false;
 
-      // Navigate to home page
+    for (var userString in users) {
+      Map<String, dynamic> user = jsonDecode(userString);
+      if (user['userEmail'] == email && user['userPassword'] == password) {
+        userId = user['userId']; // Use camelCase variable
+        isValidUser = true;
+        break;
+      }
+    }
+
+    if (isValidUser) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() {
-      _isLoading = false; // Stop loading
+      _isLoading = false;
     });
   }
 
@@ -98,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               keyboardType: TextInputType.emailAddress,
               inputFormatters: [
-                FilteringTextInputFormatter.deny(RegExp(r'\s')) // Deny spaces
+                FilteringTextInputFormatter.deny(RegExp(r'\s'))
               ],
             ),
             const SizedBox(height: 20),
@@ -117,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             _isLoading
-                ? CircularProgressIndicator() // Show loading indicator
+                ? CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _login,
                     child: const Text('Login'),

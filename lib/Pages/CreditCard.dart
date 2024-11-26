@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/Data/data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreditCardPage extends StatefulWidget {
   @override
@@ -21,16 +25,41 @@ class _CreditCardPageState extends State<CreditCardPage> {
 
   void _filterCategories() {
     setState(() {
-      print(1);
       if (_nameController.text.isNotEmpty &&
           _cardNumberController.text.isNotEmpty &&
           _expiryDateController.text.isNotEmpty &&
           _cvcController.text.isNotEmpty) {
-        nameController = _nameController.text;
-        cardNumberController = _cardNumberController.text;
-        expiryDateController = _expiryDateController.text;
-        cvcController = _cvcController.text;
+        _loadUserInfo();
+        Navigator.pushReplacementNamed(context, '/Checkout');
       }
+    });
+  }
+
+  void _loadUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> users = prefs.getStringList('users') ?? [];
+    List<String> updatedUsers = []; // List to hold updated user strings
+
+    for (var userString in users) {
+      Map<String, dynamic> user = jsonDecode(userString);
+      if (user['userId'] == userId) {
+        // Update the card number from the controller
+        user['cardNumber'] = _cardNumberController.text;
+
+        // Add the updated user back to the updatedUsers list
+        updatedUsers.add(jsonEncode(user));
+      } else {
+        // If the user is not the one being updated, keep the original user string
+        updatedUsers.add(userString);
+      }
+    }
+
+    // Save the updated users list back to SharedPreferences
+    await prefs.setStringList('users', updatedUsers);
+
+    // Optionally, update the state to reflect the changes in the UI
+    setState(() {
+      // If necessary, you can also update other UI elements or state variables here
     });
   }
 
@@ -49,6 +78,9 @@ class _CreditCardPageState extends State<CreditCardPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        title: const Text(
+          "Credit / Debit Card",
+        ),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -64,15 +96,15 @@ class _CreditCardPageState extends State<CreditCardPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
-              const Text(
-                "Credit / Debit Card",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              // // Title
+              // const Text(
+              //   "Credit / Debit Card",
+              //   style: TextStyle(
+              //     fontSize: 24,
+              //     fontWeight: FontWeight.bold,
+              //     color: Colors.black,
+              //   ),
+              // ),
               const SizedBox(height: 20),
 
               // Card display
@@ -209,6 +241,7 @@ class _CreditCardPageState extends State<CreditCardPage> {
                     // If the form is valid, proceed with the action
 
                     _filterCategories();
+
                     // You can add your logic for using the card here
                   }
                 },

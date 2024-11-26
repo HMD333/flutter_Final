@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -28,23 +30,45 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      // Save user info in shared preferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userName', nameController.text);
-      await prefs.setString('userEmail', emailController.text);
-      await prefs.setString('userPassword', passwordController.text);
-      // You can save the image path if needed
-      if (_image != null) {
-        await prefs.setString('userImage', _image!.path);
-      }
+      var uuid = Uuid();
+      String userId = uuid.v4();
 
-      // Navigate to home page or show success message
+      Map<String, dynamic> newUser = {
+        'userId': userId,
+        'userName': nameController.text,
+        'userEmail': emailController.text,
+        'userPassword': passwordController.text,
+        'userImage': _image?.path,
+        'cardNumber': '4747 4747 4747 4747',
+        'useraddres':
+            'Alexandra Smith\nCesu 31 k-2 5.st, SIA Chili\nRiga\nLV-1012\nLatvia'
+      };
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> users = prefs.getStringList('users') ?? [];
+      users.add(jsonEncode(newUser));
+      await prefs.setStringList('users', users);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully!')),
       );
 
       Navigator.pushReplacementNamed(context, '/login');
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _getUsers() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> users = prefs.getStringList('users') ?? [];
+    return users
+        .map((user) => jsonDecode(user))
+        .toList()
+        .cast<Map<String, dynamic>>();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Load users if needed
   }
 
   @override

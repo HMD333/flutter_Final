@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/Data/data.dart'; // Ensure this imports your Product and ProductManager classes
+import 'package:flutter_final_project/Data/data.dart';
+import 'package:flutter_final_project/Pages/ShoppingCart.dart'; // Ensure this imports your Product and ProductManager classes
 
 class TeaScreen extends StatefulWidget {
+  final BasketManager basketManager; // Pass BasketManager
+  final ProductManager productManager;
+
+  const TeaScreen(
+      {Key? key, required this.basketManager, required this.productManager})
+      : super(key: key);
+
   @override
   _TeaScreenState createState() => _TeaScreenState();
 }
@@ -20,19 +28,15 @@ class _TeaScreenState extends State<TeaScreen> {
   @override
   Widget build(BuildContext context) {
     // Sort products based on price
-    if (sortOrder == 'Lowest to Highest') {
-      products.sort((a, b) => a.price.compareTo(b.price));
-    } else {
-      products.sort((a, b) => b.price.compareTo(a.price));
-    }
+    products.sort((a, b) => sortOrder == 'Lowest to Highest'
+        ? a.price.compareTo(b.price)
+        : b.price.compareTo(a.price));
 
     // Filter products based on search query
-    List<Product> filteredProducts = products;
-    if (searchQuery.isNotEmpty) {
-      filteredProducts = filteredProducts.where((product) {
-        return product.name.toLowerCase().startsWith(searchQuery.toLowerCase());
-      }).toList();
-    }
+    List<Product> filteredProducts = products.where((product) {
+      return searchQuery.isEmpty ||
+          product.name.toLowerCase().startsWith(searchQuery.toLowerCase());
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -54,40 +58,19 @@ class _TeaScreenState extends State<TeaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-            ),
+            _buildSearchField(),
             const SizedBox(height: 16),
-            Wrap(
-              runSpacing: 8,
-              children: [
-                _buildFilterButton('Lowest to Highest', 'price'),
-                const SizedBox(width: 10),
-                _buildFilterButton('Highest to Lowest', 'price'),
-              ],
-            ),
+            _buildSortButtons(),
             const SizedBox(height: 16),
             Expanded(
               child: ListView(
                 children: filteredProducts.map((product) {
                   return TeaCard(
+                    id: product.id,
                     image: product.image,
                     name: product.name,
                     price: '€${product.price.toStringAsFixed(2)}',
+                    basketManager: widget.basketManager, // Pass BasketManager
                   );
                 }).toList(),
               ),
@@ -95,7 +78,43 @@ class _TeaScreenState extends State<TeaScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      onChanged: (value) {
+        setState(() {
+          searchQuery = value;
+        });
+      },
+      decoration: InputDecoration(
+        hintText: 'Search',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
+    );
+  }
+
+  Widget _buildSortButtons() {
+    return Wrap(
+      runSpacing: 8,
+      children: [
+        _buildFilterButton('Lowest to Highest', 'price'),
+        const SizedBox(width: 10),
+        _buildFilterButton('Highest to Lowest', 'price'),
+      ],
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view),
@@ -106,12 +125,25 @@ class _TeaScreenState extends State<TeaScreen> {
             label: '', // Removed label
           ),
         ],
-      ),
-    );
+        onTap: (index) {
+          if (index == 1) {
+            // Navigate to ShoppingCartPage on tap
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ShoppingCartPage(
+                  basketManager: widget.basketManager,
+                  productManager:
+                      widget.productManager, // Include ProductManager
+                ),
+              ),
+            );
+          }
+        });
   }
 
   Widget _buildFilterButton(String label, String filterType) {
-    bool isSelected = (filterType == 'price' && sortOrder == label);
+    bool isSelected = sortOrder == label;
 
     return GestureDetector(
       onTap: () {
@@ -144,11 +176,20 @@ class _TeaScreenState extends State<TeaScreen> {
 }
 
 class TeaCard extends StatelessWidget {
+  final String id;
   final String image;
   final String name;
   final String price;
+  final BasketManager basketManager; // Accept BasketManager
 
-  TeaCard({required this.image, required this.name, required this.price});
+  const TeaCard({
+    Key? key,
+    required this.id,
+    required this.image,
+    required this.name,
+    required this.price,
+    required this.basketManager, // Accept basket manager
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -186,12 +227,11 @@ class TeaCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: IconButton(
-              icon: const Icon(
-                Icons.shopping_cart,
-                size: 30,
-              ),
+              icon: const Icon(Icons.shopping_cart, size: 30),
               onPressed: () {
-                // Add your onPressed logic here
+                // Add or update the basket item
+                basketManager.addOrUpdateBasketItem(
+                    userId, id); // Ensure userId is defined
               },
             ),
           ),

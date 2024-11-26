@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/CreditCard.dart';
+import 'package:flutter_final_project/Pages/CreditCard.dart';
 import 'package:flutter_final_project/Pages/Products/Bread.dart';
 import 'package:flutter_final_project/Pages/Products/Fruits.dart';
 import 'package:flutter_final_project/Pages/Products/Tea.dart';
 import 'package:flutter_final_project/Pages/Products/Vegetables.dart';
-
 import 'package:flutter_final_project/Pages/Index.dart';
+import 'package:flutter_final_project/Pages/checkout_page.dart';
 import 'package:flutter_final_project/Pages/registration/Login.dart';
 import 'package:flutter_final_project/Pages/registration/Registrations.dart';
 import 'package:flutter_final_project/Pages/Home.dart';
 import 'package:flutter_final_project/Theme/theme_constants.dart';
 import 'package:flutter_final_project/Theme/theme_manager.dart';
+import 'package:flutter_final_project/Data/data.dart';
+import 'package:flutter_final_project/Pages/Addresspage.dart';
+import 'package:flutter_final_project/Pages/UpdateUser.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +22,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,63 +31,35 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => CreditCardPage(),
+        '/': (context) => IndexPage(),
         '/login': (context) => LoginPage(),
         '/registration': (context) => RegistrationPage(),
-        '/home': (context) => HomePage(),
-        '/Vegetables': (context) => VegetablesScreen(),
-        '/Fruits': (context) => FruitsScreen(),
-        '/Bread': (context) => BreadScreen(),
-        '/Tea': (context) => TeaScreen(),
+        '/home': (context) => HomePage(
+              productManager: ProductManager(), // Pass ProductManager
+              basketManager: BasketManager(), // Pass BasketManager
+            ),
+        // Update routes to include managers for product screens
+        '/Vegetables': (context) => VegetablesScreen(
+              basketManager: BasketManager(), // Pass BasketManager
+              productManager: ProductManager(), // Pass ProductManager
+            ),
+        '/Fruits': (context) => FruitsScreen(
+              basketManager: BasketManager(), // Pass BasketManager
+              productManager: ProductManager(), // Pass ProductManager
+            ),
+        '/Bread': (context) => BreadScreen(
+              basketManager: BasketManager(), // Pass BasketManager
+              productManager: ProductManager(), // Pass ProductManager
+            ),
+        '/Tea': (context) => TeaScreen(
+              basketManager: BasketManager(), // Pass BasketManager
+              productManager: ProductManager(), // Pass ProductManager
+            ),
+        '/Checkout': (context) => CheckoutPage(),
+        '/CreditCard': (context) => CreditCardPage(),
+        '/address': (context) => AddressFormPage(),
+        '/profile': (context) => UpdateUser()
       },
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
