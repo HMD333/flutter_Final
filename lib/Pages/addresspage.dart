@@ -21,6 +21,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _loadUserInfo();
+      Navigator.pushReplacementNamed(context, '/Checkout');
     }
   }
 
