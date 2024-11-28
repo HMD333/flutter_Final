@@ -1,7 +1,8 @@
-import 'dart:ui';
+// import 'dart:convert';
+// import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class IndexPage extends StatefulWidget {
   @override
@@ -9,9 +10,15 @@ class IndexPage extends StatefulWidget {
 }
 
 class _IndexPageState extends State<IndexPage> {
+  // void _loadUserInfo() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('users');
+  // }
+
   @override
   Widget build(BuildContext context) {
     double heigth_550px = MediaQuery.of(context).size.height - 550;
+    // _loadUserInfo();
     return Scaffold(
         backgroundColor: const Color.fromARGB(255, 45, 12, 87),
         body: SafeArea(

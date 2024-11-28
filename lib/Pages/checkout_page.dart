@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/Data/data.dart';
-import 'package:flutter_final_project/Pages/ShoppingCart.dart';
+// import 'package:flutter_final_project/Pages/ShoppingCart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutPage extends StatefulWidget {

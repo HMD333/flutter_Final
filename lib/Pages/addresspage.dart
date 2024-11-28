@@ -11,11 +11,11 @@ class AddressFormPage extends StatefulWidget {
 
 class _AddressFormPageState extends State<AddressFormPage> {
   final _formKey = GlobalKey<FormState>();
-  String _name = 'Alexandra Smith';
-  String _streetAddress = 'Cesu 31 k-2 5.st, SIA Chili';
-  String _city = 'Riga';
-  String _postalCode = 'LV-1012';
-  String _country = 'Latvia';
+  String _name = '';
+  String _streetAddress = '';
+  String _city = '';
+  String _postalCode = '';
+  String _country = '';
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -26,6 +26,24 @@ class _AddressFormPageState extends State<AddressFormPage> {
   }
 
   void _loadUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> users = prefs.getStringList('users') ?? [];
+    for (var userString in users) {
+      Map<String, dynamic> user = jsonDecode(userString);
+      if (user['userId'] == userId) {
+        List<String> oldaddress = user['useraddres'].toString().split('\n');
+        setState(() {
+          _name = oldaddress[0];
+          _streetAddress = oldaddress[1];
+          _city = oldaddress[2];
+          _postalCode = oldaddress[3];
+          _country = oldaddress[4];
+        });
+      }
+    }
+  }
+
+  void _UpdateUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> users = prefs.getStringList('users') ?? [];
     List<String> updatedUsers = []; // List to hold updated user strings
@@ -39,23 +57,16 @@ class _AddressFormPageState extends State<AddressFormPage> {
 
         // Add the updated user back to the updatedUsers list
         updatedUsers.add(jsonEncode(user));
-      } else {
-        // If not updating this user, keep the original user string
-        updatedUsers.add(userString);
       }
     }
 
     // Save the updated users list back to SharedPreferences
     await prefs.setStringList('users', updatedUsers);
-
-    // Optionally, update the state to reflect the changes in the UI
-    setState(() {
-      // If necessary, you can also update other UI elements or state variables here
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    _loadUserInfo();
     return Scaffold(
       appBar: AppBar(
         title: Text('Address Form'),

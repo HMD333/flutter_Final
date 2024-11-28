@@ -41,7 +41,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         'userImage': _image?.path,
         'cardNumber': '4747 4747 4747 4747',
         'useraddres':
-            'Alexandra Smith\nCesu 31 k-2 5.st, SIA Chili\nRiga\nLV-1012\nLatvia'
+            'Alexandra Smith\nCesu 31 k-2 5.st,\n SIA Chili\nRiga\nLV-1012\nLatvia'
       };
       SharedPreferences prefs = await SharedPreferences.getInstance();
       List<String> users = prefs.getStringList('users') ?? [];
