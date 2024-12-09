@@ -118,7 +118,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       title: Text(
         _cardNumber.isNotEmpty
             ? '**** **** **** ${_getLastFourCardNumber(_cardNumber)}'
-            : 'No card selected',
+            : '****',
         style: TextStyle(color: Colors.grey),
       ),
       trailing: ElevatedButton(

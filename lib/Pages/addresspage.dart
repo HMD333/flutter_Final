@@ -10,17 +10,23 @@ class AddressFormPage extends StatefulWidget {
 }
 
 class _AddressFormPageState extends State<AddressFormPage> {
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _streetAddress = TextEditingController();
+  final TextEditingController _city = TextEditingController();
+  final TextEditingController _postalCode = TextEditingController();
+  final TextEditingController _country = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  String _streetAddress = '';
-  String _city = '';
-  String _postalCode = '';
-  String _country = '';
+  String name = '';
+  String streetAddress = '';
+  String city = '';
+  String postalCode = '';
+  String country = '';
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _loadUserInfo();
+      _UpdateUserInfo();
       Navigator.pushReplacementNamed(context, '/Checkout');
     }
   }
@@ -33,11 +39,11 @@ class _AddressFormPageState extends State<AddressFormPage> {
       if (user['userId'] == userId) {
         List<String> oldaddress = user['useraddres'].toString().split('\n');
         setState(() {
-          _name = oldaddress[0];
-          _streetAddress = oldaddress[1];
-          _city = oldaddress[2];
-          _postalCode = oldaddress[3];
-          _country = oldaddress[4];
+          name = oldaddress[0];
+          streetAddress = oldaddress[1];
+          city = oldaddress[2];
+          postalCode = oldaddress[3];
+          country = oldaddress[4];
         });
       }
     }
@@ -53,7 +59,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
       if (user['userId'] == userId) {
         // Update the user address
         user['userAddress'] =
-            '$_name\n$_streetAddress\n$_postalCode\n$_country';
+            '${_name.text}\n${_streetAddress.text}\n${_city.text}\n${_postalCode.text}\n${_country.text}';
 
         // Add the updated user back to the updatedUsers list
         updatedUsers.add(jsonEncode(user));
@@ -80,7 +86,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
-                initialValue: _name,
+                initialValue: name,
                 decoration: InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -88,12 +94,9 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _name = value!;
-                },
               ),
               TextFormField(
-                initialValue: _streetAddress,
+                initialValue: streetAddress,
                 decoration: InputDecoration(labelText: 'Street Address'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,12 +104,9 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _streetAddress = value!;
-                },
               ),
               TextFormField(
-                initialValue: _city,
+                initialValue: city,
                 decoration: InputDecoration(labelText: 'City'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -114,12 +114,9 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _city = value!;
-                },
               ),
               TextFormField(
-                initialValue: _postalCode,
+                initialValue: postalCode,
                 decoration: InputDecoration(labelText: 'Postal Code'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -127,21 +124,15 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _postalCode = value!;
-                },
               ),
               TextFormField(
-                initialValue: _country,
+                initialValue: country,
                 decoration: InputDecoration(labelText: 'Country'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your country';
                   }
                   return null;
-                },
-                onSaved: (value) {
-                  _country = value!;
                 },
               ),
               SizedBox(height: 20),

@@ -109,7 +109,7 @@ class _VegetablesScreenState extends State<VegetablesScreen> {
                       id: product.id,
                       image: product.image,
                       name: product.name,
-                      price: '€${product.price.toStringAsFixed(2)}');
+                      price: 'SR${product.price.toStringAsFixed(2)}');
                 }).toList(),
               ),
             ),

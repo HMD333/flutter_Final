@@ -77,8 +77,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         title: Text(product.name), // Assuming product has a name property
         subtitle: Text(
           'Quantity: ${item.quantity}\n'
-          'Price: ${product.price.toStringAsFixed(2)} RS\n'
-          'Total: ${(product.price * item.quantity).toStringAsFixed(2)} RS',
+          'Price: ${product.price.toStringAsFixed(2)} SR\n'
+          'Total: ${(product.price * item.quantity).toStringAsFixed(2)} SR',
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -103,7 +103,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   Widget _buildTotalPrice() {
     return Text(
-      'Total: ${calculateTotal().toStringAsFixed(2)} RS',
+      'Total: ${calculateTotal().toStringAsFixed(2)} SR',
       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
